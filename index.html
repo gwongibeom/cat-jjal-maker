@@ -39,38 +39,41 @@
         ></script>
         <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
         <script type="text/babel">
-            console.log("야옹")
+            const jsonLocalStorage = {
+                setItem: (key, value) => {
+                    localStorage.setItem(key, JSON.stringify(value))
+                },
+                getItem: (key) => {
+                    return JSON.parse(localStorage.getItem(key))
+                },
+            }
 
             function Title(props) {
                 return <h1>{props.children}</h1>
             }
 
-            const Form = () => {
-                const [value, setvalue] = React.useState("")
+            const Form = ({ updateMainCat }) => {
+                const [value, setvalue] = React.useState('')
                 const includesHangul = (text) => /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/i.test(text)
-                const [errorMessage, setErrorMessage] = React.useState("")
+                const [errorMessage, setErrorMessage] = React.useState('')
 
                 function handleInputChange(e) {
                     const userValue = e.target.value
-                    console.log(includesHangul(userValue))
+                    setErrorMessage('')
                     if (includesHangul(userValue)) {
-                        setErrorMessage("한글이 포함되어 있습니다.")
-                    } else {
-                        setErrorMessage("")
+                        setErrorMessage('한글이 포함되어 있습니다.')
                     }
                     setvalue(userValue.toUpperCase())
                 }
 
                 function handleFormSubmit(e) {
                     e.preventDefault()
-                    if (value === "") {
-                        setErrorMessage("비어 있습니다.")
-                    } else {
-                        setErrorMessage("")
-                        console.log("폼 전송됨")
-                        setCounter(counter + 1)
-                        setMaincat(CAT2)
+                    setErrorMessage('')
+                    if (value === '') {
+                        setErrorMessage('비어 있습니다.')
+                        return
                     }
+                    updateMainCat()
                 }
 
                 return (
@@ -83,7 +86,7 @@
                             value={value}
                         />
                         <button type='submit'>생성</button>
-                        <p style={{ color: "red" }}>{errorMessage}</p>
+                        <p style={{ color: 'red' }}>{errorMessage}</p>
                     </form>
                 )
             }
@@ -94,7 +97,7 @@
                         <img
                             src={img}
                             style={{
-                                width: "150px",
+                                width: '150px',
                             }}
                         />
                     </li>
@@ -110,49 +113,53 @@
                     </ul>
                 )
             }
-
+                
             const Maincard = (props) => {
                 return (
                     <div className='main-card'>
                         <img src={props.img} alt='고양이' width='400' />
-                        <button onClick={props.handleHeartClick}>🤍</button>
+                        <button onClick={props.onHeartClick}>🤍</button>
                     </div>
                 )
             }
 
             const App = () => {
-                const CAT1 = "https://cataas.com/cat/HSENVDU4ZMqy7KQ0/says/react"
-                const CAT2 = "https://cataas.com/cat/BxqL2EjFmtxDkAm2/says/inflearn"
-                const CAT3 = "https://cataas.com/cat/18MD6byVC1yKGpXp/says/JavaScript"
+                const CAT1 = 'https://cataas.com/cat/HSENVDU4ZMqy7KQ0/says/react'
+                const CAT2 = 'https://cataas.com/cat/BxqL2EjFmtxDkAm2/says/inflearn'
+                const CAT3 = 'https://cataas.com/cat/18MD6byVC1yKGpXp/says/JavaScript'
 
-                const [counter, setCounter] = React.useState(1)
+                const [counter, setCounter] = React.useState(
+                    jsonLocalStorage.getItem('counter')
+                )
                 const [mainCat, setMaincat] = React.useState(CAT1)
-                const [favorites, setFavorites] = React.useState([CAT1, CAT2])
-                console.log("카운터", counter)
+                const [favorites, setFavorites] = React.useState(
+                    jsonLocalStorage.getItem('favorites') || []
+                )
 
-                function handleFormSubmit(event) {
-                    event.preventDefault()
-                    console.log("폼 전송됨")
-                    setCounter(counter + 1)
+                function updateMainCat(event) {
                     setMaincat(CAT2)
+                    const nextCounter = counter + 1
+                    setCounter(nextCounter)
+                    jsonLocalStorage.setItem('counter', nextCounter)
                 }
 
                 function handleHeartClick() {
-                    console.log("하투누름")
-                    setFavorites([...favorites, CAT3])
+                    const nextFavorites = [...favorites, mainCat]
+                    setFavorites(nextFavorites)
+                    jsonLocalStorage.setItem('favorites', nextFavorites)
                 }
 
                 return (
                     <div className='app'>
                         <Title>{counter} 번째 고양이 가라사대</Title>
-                        <Form handleFormSubmit={handleFormSubmit} />
-                        <Maincard img={mainCat} handleHeartClick={handleHeartClick} />
+                        <Form updateMainCat={updateMainCat} />
+                        <Maincard img={mainCat} onHeartClick={handleHeartClick} />
                         <Favorites favorites={favorites} />
                     </div>
                 )
             }
 
-            const 여기다가그려 = document.querySelector("#app")
+            const 여기다가그려 = document.querySelector('#app')
 
             ReactDOM.createRoot(여기다가그려).render(<App />)
         </script>
