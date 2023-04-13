@@ -48,6 +48,15 @@
                 },
             }
 
+            const fetchCat = async (text) => {
+                const OPEN_API_DOMAIN = 'https://cataas.com'
+                const response = await fetch(
+                    `${OPEN_API_DOMAIN}/cat/says/${text}?json=true`
+                )
+                const responseJson = await response.json()
+                return `${OPEN_API_DOMAIN}/${responseJson.url}`
+            }
+
             function Title(props) {
                 return <h1>{props.children}</h1>
             }
@@ -73,7 +82,7 @@
                         setErrorMessage('비어 있습니다.')
                         return
                     }
-                    updateMainCat()
+                    updateMainCat(value)
                 }
 
                 return (
@@ -113,7 +122,7 @@
                     </ul>
                 )
             }
-                
+
             const Maincard = (props) => {
                 return (
                     <div className='main-card'>
@@ -136,8 +145,9 @@
                     jsonLocalStorage.getItem('favorites') || []
                 )
 
-                function updateMainCat(event) {
-                    setMaincat(CAT2)
+                async function updateMainCat(value) {
+                    const newCat = await fetchCat(value)
+                    setMaincat(newCat)
                     const nextCounter = counter + 1
                     setCounter(nextCounter)
                     jsonLocalStorage.setItem('counter', nextCounter)
