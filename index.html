@@ -114,6 +114,9 @@
             }
 
             function Favorites({ favorites }) {
+                if (favorites.length === 0) {
+                    return <div>사진 위 ❤를 눌러 사진을 저장해봐요!!!</div>
+                }
                 return (
                     <ul className='favorites'>
                         {favorites.map((cat) => (
@@ -124,10 +127,11 @@
             }
 
             const Maincard = (props) => {
+                const heartIcon = props.isHeartedCatInArray ? '💖' : '🤍'
                 return (
                     <div className='main-card'>
                         <img src={props.img} alt='고양이' width='400' />
-                        <button onClick={props.onHeartClick}>🤍</button>
+                        <button onClick={props.onHeartClick}>{heartIcon}</button>
                     </div>
                 )
             }
@@ -137,20 +141,34 @@
                 const CAT2 = 'https://cataas.com/cat/BxqL2EjFmtxDkAm2/says/inflearn'
                 const CAT3 = 'https://cataas.com/cat/18MD6byVC1yKGpXp/says/JavaScript'
 
-                const [counter, setCounter] = React.useState(
-                    jsonLocalStorage.getItem('counter')
-                )
+                const [counter, setCounter] = React.useState(() => {
+                    return jsonLocalStorage.getItem('counter')
+                })
                 const [mainCat, setMaincat] = React.useState(CAT1)
-                const [favorites, setFavorites] = React.useState(
-                    jsonLocalStorage.getItem('favorites') || []
-                )
+                const [favorites, setFavorites] = React.useState(() => {
+                    return jsonLocalStorage.getItem('favorites') || []
+                })
+
+                async function setInitialCat() {
+                    const newCat = await fetchCat('First cat')
+                    setMaincat(newCat)
+                }
+
+                React.useEffect(() => {
+                    setInitialCat()
+                }, [])
+
+                const isHeartedCatInArray = favorites.includes(mainCat)
 
                 async function updateMainCat(value) {
                     const newCat = await fetchCat(value)
                     setMaincat(newCat)
-                    const nextCounter = counter + 1
-                    setCounter(nextCounter)
-                    jsonLocalStorage.setItem('counter', nextCounter)
+
+                    setCounter((prev) => {
+                        const nextCounter = prev + 1
+                        jsonLocalStorage.setItem('counter', nextCounter)
+                        return nextCounter
+                    })
                 }
 
                 function handleHeartClick() {
@@ -159,11 +177,17 @@
                     jsonLocalStorage.setItem('favorites', nextFavorites)
                 }
 
+                const counterTitle = counter === null ? '' : counter + '번째 '
+
                 return (
                     <div className='app'>
-                        <Title>{counter} 번째 고양이 가라사대</Title>
+                        <Title>{counterTitle}고양이 가라사대</Title>
                         <Form updateMainCat={updateMainCat} />
-                        <Maincard img={mainCat} onHeartClick={handleHeartClick} />
+                        <Maincard
+                            img={mainCat}
+                            onHeartClick={handleHeartClick}
+                            isHeartedCatInArray={isHeartedCatInArray}
+                        />
                         <Favorites favorites={favorites} />
                     </div>
                 )
