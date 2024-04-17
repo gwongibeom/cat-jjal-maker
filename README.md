@@ -4,6 +4,8 @@ https://gwongibeom.github.io/cat-jjal-maker/
 
 > 고양이 짤방을 생성하는 리액트 앱입니다
 
+API 서버 이슈로 인해 작동이 원할하지 않을 수 있습니다.
+
 ![328234-0-resize](https://user-images.githubusercontent.com/3839771/149098995-0b89419a-58fb-494a-ade3-27aae5342553.gif)
 
 ## 연관 리액트 강의
